@@ -2,6 +2,7 @@ import { GameController, MAX_PLAYERS, getRoomId } from "./game.js";
 import { authenticateAdmin, isAdminAuthenticated, signOutAdmin } from "./admin-auth.js";
 
 const game = new GameController(getRoomId());
+game.isAdmin = true; // este painel só abre depois do login do admin
 const $ = (selector) => document.querySelector(selector);
 const loginScreen = $("#admin-login-screen");
 const panel = $("#admin-panel");
@@ -53,7 +54,7 @@ function renderRoster(room) {
 }
 
 async function claimAdminControl() {
-  await game.roomRef.transaction((current) => {
+  await game.tx((current) => {
     const room = current || { status: "lobby", players: {}, settings: { initialLives: 1 } };
     room.status = room.status || "lobby";
     room.players = room.players || {};

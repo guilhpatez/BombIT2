@@ -1,6 +1,8 @@
 import { firebaseIsConfigured } from "./firebase-config.js";
 import { SPECIAL_WORDS, COMMON_WORDS, COMMON_FRAGMENT_POOL } from "./words.js";
 
+// Sala padrão própria desta versão: não mistura dados com a versão 1 do BombIT (mesmo Firebase).
+const DEFAULT_ROOM = "bombit2-principal";
 export const MAX_PLAYERS = 40;
 export const INITIAL_LIVES = 1;
 export const START_TIME = 15;
@@ -188,6 +190,32 @@ export class GameController {
     this.presenceArmed = false;
     this.identity = null;
     this.timerLoop = null;
+    // Verdadeiro só no painel do admin (admin.html): ele sempre pode controlar a sala.
+    this.isAdmin = false;
+  }
+
+  /**
+   * Transação segura. O Firebase cancela uma transação pendente com "Error: set" quando
+   * outra escrita (presença, "digitando") acontece ao mesmo tempo na sala. Aqui evitamos
+   * eventos locais intermediários e tentamos de novo se isso acontecer.
+   */
+  async tx(update) {
+    for (let attempt = 0; ; attempt += 1) {
+      try {
+        return await this.roomRef.transaction(update, undefined, false);
+      } catch (error) {
+        if (String(error?.message) !== "set" || attempt >= 4) throw error;
+        await new Promise((resolve) => window.setTimeout(resolve, 150 * (attempt + 1)));
+      }
+    }
+  }
+
+  /** O admin autenticado assume o controle da sala na própria ação (sem depender de disputas por hostId). */
+  takeControl(data) {
+    if (data.hostId === this.uid) return true;
+    if (!this.isAdmin) return false;
+    data.hostId = this.uid;
+    return true;
   }
 
   get configured() {
@@ -212,7 +240,7 @@ export class GameController {
 
     this.roomRef.on("value", (snapshot) => {
       this.room = snapshot.val() || { status: "lobby", players: {} };
-      if (this.room.players?.[this.uid] && !this.presenceArmed) this.armPresence();
+      if (!this.isAdmin && this.room.players?.[this.uid] && !this.presenceArmed) this.armPresence();
       this.onStateChange(this.room);
     });
 
@@ -258,7 +286,7 @@ export class GameController {
     let suggestion = cleanName;
     const now = this.serverNow();
 
-    const result = await this.roomRef.transaction((current) => {
+    const result = await this.tx((current) => {
       const data = current || { status: "lobby", players: {}, settings: { initialLives: INITIAL_LIVES } };
       if (data.status === "playing") {
         issue = "Partida em andamento — aguarde a próxima rodada.";
@@ -312,8 +340,8 @@ export class GameController {
 
   async setInitialLives(lives) {
     const safeLives = Math.min(3, Math.max(1, Number(lives) || INITIAL_LIVES));
-    const result = await this.roomRef.transaction((data) => {
-      if (!data || data.status !== "lobby" || data.hostId !== this.uid) return;
+    const result = await this.tx((data) => {
+      if (!data || data.status !== "lobby" || !this.takeControl(data)) return;
       data.settings = data.settings || {};
       data.settings.initialLives = safeLives;
       return data;
@@ -324,9 +352,9 @@ export class GameController {
   async startGame() {
     const now = this.serverNow();
     let issue = "";
-    const result = await this.roomRef.transaction((data) => {
-      if (!data || data.status !== "lobby" || data.hostId !== this.uid) {
-        issue = "Somente o admin pode iniciar a partida.";
+    const result = await this.tx((data) => {
+      if (!data || data.status !== "lobby" || !this.takeControl(data)) {
+        issue = !data || data.status !== "lobby" ? "A sala não está no lobby. Clique em \"Nova partida\" ou troque o nome da sala." : "Somente o admin pode iniciar a partida.";
         return;
       }
       const connectedIds = Object.entries(data.players || {})
@@ -540,7 +568,7 @@ export class GameController {
     const entry = ANSWER_MAP.get(answer);
     const now = this.serverNow();
     let issue = "";
-    const result = await this.roomRef.transaction((data) => {
+    const result = await this.tx((data) => {
       const game = data?.game;
       if (!data || data.status !== "playing" || !game || game.currentPlayerId !== this.uid) {
         issue = "Não é a sua vez.";
@@ -605,7 +633,7 @@ export class GameController {
     this.timeoutInFlight = true;
     const now = this.serverNow();
     try {
-      await this.roomRef.transaction((data) => {
+      await this.tx((data) => {
         const game = data?.game;
         if (!data || data.status !== "playing" || !game?.currentPlayerId) return;
         const currentPlayer = data.players?.[game.currentPlayerId];
@@ -622,9 +650,9 @@ export class GameController {
 
   async skipTurn() {
     const now = this.serverNow();
-    const result = await this.roomRef.transaction((data) => {
+    const result = await this.tx((data) => {
       const game = data?.game;
-      if (!data || data.status !== "playing" || data.hostId !== this.uid || !game?.currentPlayerId) return;
+      if (!data || data.status !== "playing" || !this.takeControl(data) || !game?.currentPlayerId) return;
       this.applyAdvance(data, game, now, {
         newFragment: false,
         feedback: makeFeedback("skip", `↪ ${nameFor(data, game.currentPlayerId)} teve a vez pulada pelo admin.`, now)
@@ -636,8 +664,8 @@ export class GameController {
 
   async endGame() {
     const now = this.serverNow();
-    const result = await this.roomRef.transaction((data) => {
-      if (!data || data.status !== "playing" || data.hostId !== this.uid) return;
+    const result = await this.tx((data) => {
+      if (!data || data.status !== "playing" || !this.takeControl(data)) return;
       finishGame(data, "host-ended", now, true);
       data.game.feedback = makeFeedback("skip", "Partida encerrada pelo admin.", now);
       return data;
@@ -648,7 +676,7 @@ export class GameController {
   async resetRoom() {
     if (!this.identity) return { ok: false, reason: "Seu nome não está disponível para a nova rodada." };
     const previousLives = Number(this.room?.settings?.initialLives) || INITIAL_LIVES;
-    const result = await this.roomRef.transaction((data) => {
+    const result = await this.tx((data) => {
       if (!data || data.status !== "finished" || data.hostId !== this.uid) return;
       return {
         status: "lobby",
@@ -689,9 +717,9 @@ export class GameController {
 }
 
 export function getRoomId() {
-  const requested = new URLSearchParams(window.location.search).get("sala") || "sala-principal";
+  const requested = new URLSearchParams(window.location.search).get("sala") || DEFAULT_ROOM;
   const safe = requested.toLowerCase().replace(/[^a-z0-9_-]/g, "").slice(0, 40);
-  return safe || "sala-principal";
+  return safe || DEFAULT_ROOM;
 }
 
 /** Glossário oficial = as palavras especiais (eventos). */
