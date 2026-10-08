@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#10131f">
+    <title>BombIT · Área do admin</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar"><a class="brand" href="./"><span class="brand-mark">💣</span><span>Bomb<span>IT</span></span></a><span class="room-label" id="room-label"></span></header>
+      <section class="screen active" id="admin-login-screen" aria-labelledby="admin-title">
+        <div class="entry-card panel">
+          <p class="eyebrow">ÁREA DO ADMIN</p>
+          <h1 id="admin-title">Controle da<br><em>partida.</em></h1>
+          <p class="intro">Entre para abrir a sala, ajustar as vidas e iniciar a rodada quando a turma estiver pronta.</p>
+          <form id="admin-login-form">
+            <label for="admin-login">Usuário</label>
+            <input id="admin-login" autocomplete="username" required>
+            <label for="admin-password">Senha</label>
+            <input id="admin-password" type="password" autocomplete="current-password" required>
+            <button class="button button-primary button-large" type="submit">Entrar no painel</button>
+          </form>
+          <div class="notice hidden" id="login-notice" role="alert"></div>
+        </div>
+      </section>
+      <section class="screen active hidden" id="admin-panel" aria-labelledby="panel-title">
+        <div class="screen-heading"><div><p class="eyebrow">PAINEL DO ADMIN</p><h1 id="panel-title">Sala de controle.</h1></div><span class="count-chip" id="admin-count">0 alunos conectados</span></div>
+        <div class="lobby-layout">
+          <section class="panel roster-panel"><h2>Alunos na sala</h2><ul class="player-roster" id="admin-roster"></ul><p class="empty-state" id="admin-empty">Aguardando alunos…</p></section>
+          <section class="panel host-panel">
+            <p class="eyebrow">COMANDOS</p>
+            <h2>Rodada</h2>
+            <div class="life-setting"><span>Vidas iniciais</span><div class="segmented" id="lives-options"><button type="button" data-lives="1">1</button><button type="button" data-lives="2">2</button><button type="button" data-lives="3">3</button></div></div>
+            <button class="button button-primary" id="admin-start" type="button">Iniciar partida ⚡</button>
+            <button class="button button-quiet hidden" id="admin-skip" type="button">Pular vez atual</button>
+            <button class="button button-danger hidden" id="admin-end" type="button">Terminar partida</button>
+            <button class="button button-primary hidden" id="admin-reset" type="button">Começar nova partida ↻</button>
+            <button class="button button-quiet" id="admin-logout" type="button">Sair do painel</button>
+            <div class="notice hidden" id="admin-status" role="status"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script type="module" src="js/admin.js"></script>
+  </body>
+</html>

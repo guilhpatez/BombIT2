@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#10131f">
+    <title>BombIT · Sala</title>
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar"><a class="brand" href="./"><span class="brand-mark">💣</span><span>Bomb<span>IT</span></span></a><span class="room-label" id="room-label"></span></header>
+      <section class="screen active" id="waiting-screen" aria-labelledby="waiting-title">
+        <div class="screen-heading"><div><p class="eyebrow">SALA DE ESPERA</p><h1 id="waiting-title">Prepare-se.</h1></div><span class="count-chip" id="waiting-count">0 alunos na sala</span></div>
+        <div class="lobby-layout"><section class="panel roster-panel"><h2>Participantes</h2><ul class="player-roster" id="waiting-roster"></ul><p class="empty-state" id="waiting-empty">Aguardando participantes…</p></section><aside class="panel host-panel"><p class="eyebrow">AGUARDE</p><h2>A partida começa em breve</h2><p class="intro" id="waiting-message">Conectando à sala…</p><button class="button button-quiet" id="waiting-glossary-button" type="button" aria-expanded="false">Ver glossário completo</button><a class="button button-quiet" href="./">Voltar ao início</a></aside></div><section class="glossary panel hidden" id="waiting-glossary"><h2>Palavras especiais (eventos)</h2><ul id="waiting-glossary-list"></ul></section>
+      </section>
+      <section class="screen" id="game-screen" aria-labelledby="game-title">
+        <div class="game-header"><div><p class="eyebrow" id="round-label">RODADA 1</p><h1 id="game-title"><span id="remaining-count">0</span> jogadores restantes</h1></div><div class="turn-status" id="turn-status">Preparando…</div></div>
+        <div class="game-layout"><aside class="panel game-roster-panel"><h2>Jogadores</h2><ul class="player-roster game-roster" id="game-roster"></ul></aside><section class="game-center"><div class="feedback-card" id="feedback-card" role="status"></div><div class="event-card hidden" id="event-card" aria-live="polite"></div><div class="bomb-stage" id="bomb-stage"><div class="fuse"><span class="spark">✦</span></div><div class="bomb"><span class="bomb-shine"></span><span class="fragment" id="fragment">--</span></div><div class="timer-wrap"><div class="timer-track"><span id="timer-bar"></span></div><strong id="timer-number">15</strong><span>s</span></div></div><p class="live-typing" id="live-typing"></p><form class="answer-form" id="answer-form"><label class="sr-only" for="answer-input">Termo em inglês</label><input id="answer-input" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Digite um termo em inglês" disabled><button class="button button-primary" id="answer-button" type="submit" disabled>Enviar ↵</button></form><p class="turn-instruction" id="turn-instruction">Acompanhe a vez da turma.</p></section></div>
+      </section>
+      <section class="screen" id="podium-screen" aria-labelledby="podium-title"><div class="screen-heading podium-heading"><div><p class="eyebrow">FIM DE PARTIDA</p><h1 id="podium-title">Os últimos a sobreviver.</h1></div><span class="finish-reason" id="finish-reason"></span></div><section class="podium"><article class="podium-place second" id="place-2"><span class="medal">🥈</span><strong>—</strong><small>2º lugar</small></article><article class="podium-place first" id="place-1"><span class="medal">🏆</span><strong>—</strong><small>1º lugar</small></article><article class="podium-place third" id="place-3"><span class="medal">🥉</span><strong>—</strong><small>3º lugar</small></article></section><div class="podium-actions"><button class="button button-quiet" id="glossary-button" type="button">Ver glossário completo</button><a class="button button-primary" href="./">Voltar ao início</a></div><section class="glossary panel hidden" id="glossary"><h2>Palavras especiais (eventos)</h2><ul id="glossary-list"></ul></section></section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script type="module" src="js/room.js"></script>
+    <script type="module" src="js/waiting-glossary.js"></script>
+  </body>
+</html>

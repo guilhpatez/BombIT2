@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#10131f">
+    <meta name="description" content="BombIT — jogo multiplayer de vocabulário técnico em inglês.">
+    <title>BombIT · Entrar na sala</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23101420'/%3E%3Ccircle cx='32' cy='36' r='19' fill='%23ed593a'/%3E%3Cpath d='M32 17c0-8 8-8 10-14' fill='none' stroke='%23f8ca5b' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='45' cy='8' r='4' fill='%23d9ff52'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/style.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="./" aria-label="BombIT, início"><span class="brand-mark" aria-hidden="true">💣</span><span>Bomb<span>IT</span></span></a>
+        <span class="room-label" id="room-label"></span>
+      </header>
+      <section class="screen active" aria-labelledby="entry-title">
+        <div class="entry-card panel">
+          <p class="eyebrow">VOCABULÁRIO TÉCNICO · INGLÊS</p>
+          <h1 id="entry-title">Pronto para<br><em>a bomba?</em></h1>
+          <p class="intro">Escolha seu nome e entre na sala. O admin iniciará a partida quando a turma estiver pronta.</p>
+          <form id="join-form" novalidate>
+            <label for="player-name">Como você quer aparecer?</label>
+            <input id="player-name" name="player-name" type="text" minlength="2" maxlength="16" autocomplete="nickname" placeholder="Seu nome" required>
+            <p class="field-help">De 2 a 16 caracteres. Sem emoji nem espaços no começo/fim.</p>
+            <fieldset class="avatar-picker">
+              <legend>Escolha seu avatar</legend>
+              <div class="avatar-options">
+                <button type="button" class="avatar-choice selected" data-avatar="🚀" aria-pressed="true">🚀</button>
+                <button type="button" class="avatar-choice" data-avatar="🧠" aria-pressed="false">🧠</button>
+                <button type="button" class="avatar-choice" data-avatar="⚡" aria-pressed="false">⚡</button>
+                <button type="button" class="avatar-choice" data-avatar="🎮" aria-pressed="false">🎮</button>
+                <button type="button" class="avatar-choice" data-avatar="🤖" aria-pressed="false">🤖</button>
+                <button type="button" class="avatar-choice" data-avatar="🛸" aria-pressed="false">🛸</button>
+              </div>
+            </fieldset>
+            <button class="button button-primary button-large" id="join-button" type="submit">Entrar na sala <span aria-hidden="true">→</span></button>
+          </form>
+          <div class="notice hidden" id="entry-notice" role="status"></div>
+          <p class="tiny-note">Você será levado para a sala de espera.</p>
+          <p class="tiny-note"><a href="admin.html">Área do Admin</a></p>
+        </div>
+      </section>
+    </main>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.19.0/firebase-auth-compat.js"></script>
+    <script type="module" src="js/player.js"></script>
+  </body>
+</html>
