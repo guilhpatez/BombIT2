@@ -182,8 +182,16 @@ answerForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   if (!answer.value.trim() || answer.disabled) return;
   answerButton.disabled = true;
-  await game.submitAnswer(answer.value);
-  answer.value = "";
+  const outcome = await game.submitAnswer(answer.value);
+  if (outcome.ok) {
+    answer.value = "";
+  } else {
+    // Errou: sem perder vida, o jogador pode tentar de novo enquanto a bomba não estoura.
+    answerButton.disabled = false;
+    if (outcome.reason) turnInstruction.textContent = `⚠️ ${outcome.reason}`;
+    answer.focus();
+    answer.select();
+  }
 });
 
 glossaryButton.addEventListener("click", () => {

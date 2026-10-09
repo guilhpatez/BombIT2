@@ -5,14 +5,14 @@ import { SPECIAL_WORDS, COMMON_WORDS, COMMON_FRAGMENT_POOL } from "./words.js";
 const DEFAULT_ROOM = "bombit2-principal";
 export const MAX_PLAYERS = 40;
 export const INITIAL_LIVES = 1;
-export const START_TIME = 15;
-export const MIN_TIME = 6;
+export const START_TIME = 30;
+export const MIN_TIME = 12;
 const FRAGMENT_SIZE = 2;
 const MIN_FRAGMENT_WORDS = 25;   // um fragmento só é sorteado se existirem muitas palavras com ele
 
 // ---- Eventos especiais -------------------------------------------------
 export const MAX_LIVES = 3;
-const EVENT_TIME = 15;           // segundos para responder um evento
+const EVENT_TIME = 25;           // segundos para responder um evento
 const EVENT_MIN_GAP = 4;         // nunca antes de 4 acertos desde o último evento
 const EVENT_MAX_GAP = 9;         // garantido até o 9º acerto
 const EVENT_CHANCE = 0.3;        // chance por acerto entre o mínimo e o máximo
@@ -581,8 +581,9 @@ export class GameController {
         } else if (answer === game.event.canonical) {
           this.applyEventResult(data, true, "", now);
         } else {
-          this.applyEventResult(data, false, "wrong", now);
-          issue = "Palavra do evento incorreta.";
+          // Errou a palavra do evento: pode tentar de novo até o tempo acabar.
+          issue = "Não é essa palavra. Tente de novo!";
+          return;
         }
         return data;
       }
@@ -591,20 +592,18 @@ export class GameController {
         issue = "O tempo acabou.";
         return data;
       }
+      // Resposta errada NÃO tira vida: o jogador tenta de novo. Só a bomba estourando tira vida.
       if (!entry) {
-        this.applyLoss(data, "invalid", now);
-        issue = "Termo inválido.";
-        return data;
+        issue = "Palavra não encontrada. Tente outra!";
+        return;
       }
       if (!entry.canonical.includes(game.fragment)) {
-        this.applyLoss(data, "wrongFragment", now, entry);
-        issue = "O termo não contém o fragmento.";
-        return data;
+        issue = `Essa palavra não contém "${game.fragment}". Tente outra!`;
+        return;
       }
       if (data.usedTerms?.[entry.canonical]) {
-        this.applyLoss(data, "repeated", now, entry);
-        issue = "Esse termo já foi usado.";
-        return data;
+        issue = "Essa palavra já foi usada. Tente outra!";
+        return;
       }
 
       data.usedTerms = data.usedTerms || {};

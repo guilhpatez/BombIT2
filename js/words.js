@@ -41,7 +41,7 @@ export const SPECIAL_WORDS = [
   {
     term: "Screen", icon: "🖥️", title: "Tela Limpa", effect: "reset",
     hintPt: "A parte do computador, celular ou TV onde aparece a imagem.",
-    rewardPt: "O tempo das bombas volta para 15 segundos"
+    rewardPt: "O tempo das bombas volta ao máximo (30 s)"
   }
 ];
 
